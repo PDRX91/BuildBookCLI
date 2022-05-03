@@ -34,51 +34,62 @@ const updateJson = (initialData, changeData) => {
   const input = JSON.parse(initialData);
   const keys = Object.keys(changes);
 
+  const addSongs = () => {
+    changes.add_songs_to_playlist.forEach((item) => {
+      const result = input.playlists.find(
+        (playlist) => playlist.id === item.playlist_id
+      );
+      if (result) {
+        result.song_ids.push(item.song_id);
+      } else {
+        throw new Error("Playlist not valid");
+      }
+    });
+  };
+
+  const addPlaylist = () => {
+    changes.add_playlist.forEach((item) => {
+      const result = input.users.find((user) => user.id === item.user_id);
+      if (result) {
+        input.playlists.push({
+          id: `${Math.floor(Math.random() * (100000 - 100)) + 100}`,
+          owner_id: item.user_id,
+          song_ids: item.song_ids,
+        });
+      } else {
+        throw new Error("User not valid");
+      }
+    });
+  };
+
+  const removePlaylist = () => {
+    changes.add_songs_to_playlist.forEach((item, index) => {
+      const result = input.playlists.find(
+        (playlist) => playlist.id === item.playlist_id
+      );
+      if (result) {
+        const index = input.playlists.indexOf(result);
+        input.playlists.splice(index, 1);
+      } else {
+        throw new Error("Playlist does not exist");
+      }
+    });
+  };
+
   keys.forEach((key) => {
     if (key === "add_songs_to_playlist") {
-      changes.add_songs_to_playlist.forEach((item) => {
-        const result = input.playlists.find(
-          (playlist) => playlist.id === item.playlist_id
-        );
-        if (result) {
-          result.song_ids.push(item.song_id);
-        } else {
-          throw new Error("Playlist not valid");
-        }
-      });
+      addSongs();
     }
     if (key === "add_playlist") {
-      changes.add_playlist.forEach((item) => {
-        const result = input.users.find((user) => user.id === item.user_id);
-        if (result) {
-          input.playlists.push({
-            id: `${Math.floor(Math.random() * (100000 - 100)) + 100}`,
-            owner_id: item.user_id,
-            song_ids: item.song_ids,
-          });
-        } else {
-          throw new Error("User not valid");
-        }
-      });
+      addPlaylist();
     }
     if (key === "remove_playlist") {
-      changes.add_songs_to_playlist.forEach((item, index) => {
-        const result = input.playlists.find(
-          (playlist) => playlist.id === item.playlist_id
-        );
-        if (result) {
-          const index = input.playlists.indexOf(result);
-          input.playlists.splice(index, 1);
-          console.log("INDEX", input.playlists);
-        } else {
-          throw new Error("Playlist does not exist");
-        }
-      });
+      removePlaylist();
     }
+  });
 
-    fs.writeFile(OUTPUT_FILEPATH, JSON.stringify(input, null, 2), (err) => {
-      if (err) console.log("Error writing file:", err);
-    });
+  fs.writeFile(OUTPUT_FILEPATH, JSON.stringify(input, null, 2), (err) => {
+    if (err) console.log("Error writing file:", err);
   });
 };
 
