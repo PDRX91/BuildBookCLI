@@ -32,12 +32,10 @@ const readJson = async () => {
 const updateJson = (initialData, changeData) => {
   const changes = JSON.parse(changeData);
   const input = JSON.parse(initialData);
-  // console.log(changes);
   const keys = Object.keys(changes);
+
   keys.forEach((key) => {
     if (key === "add_songs_to_playlist") {
-      console.log(changes.add_songs_to_playlist);
-      console.log(input.playlists);
       changes.add_songs_to_playlist.forEach((item) => {
         const result = input.playlists.find(
           (playlist) => playlist.id === item.playlist_id
@@ -47,7 +45,34 @@ const updateJson = (initialData, changeData) => {
         } else {
           throw new Error("Playlist not valid");
         }
-        console.log("RESULT", input.playlists);
+      });
+    }
+    if (key === "add_playlist") {
+      changes.add_playlist.forEach((item) => {
+        const result = input.users.find((user) => user.id === item.user_id);
+        if (result) {
+          input.playlists.push({
+            id: `${Math.floor(Math.random() * (100000 - 100)) + 100}`,
+            owner_id: item.user_id,
+            song_ids: item.song_ids,
+          });
+        } else {
+          throw new Error("User not valid");
+        }
+      });
+    }
+    if (key === "remove_playlist") {
+      changes.add_songs_to_playlist.forEach((item, index) => {
+        const result = input.playlists.find(
+          (playlist) => playlist.id === item.playlist_id
+        );
+        if (result) {
+          const index = input.playlists.indexOf(result);
+          input.playlists.splice(index, 1);
+          console.log("INDEX", input.playlists);
+        } else {
+          throw new Error("Playlist does not exist");
+        }
       });
     }
 
