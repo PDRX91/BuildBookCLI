@@ -1,15 +1,17 @@
 #!/usr/bin/env node
 const fs = require("fs");
+
 const INPUT_FILEPATH = `./${process.argv[2]}`;
 const CHANGES_FILEPATH = `./${process.argv[3]}`;
 const OUTPUT_FILEPATH = `./${process.argv[4]}`;
+
 const readJson = async () => {
   const inputData = await fs.promises.readFile(INPUT_FILEPATH, (err, data) => {
     try {
       return data;
     } catch {
       throw new Error(
-        `There was an issue reading the file at ${INPUT_FILEPATH}`
+        `There was an issue reading the file at ${INPUT_FILEPATH}: ${err}`
       );
     }
   });
@@ -20,7 +22,7 @@ const readJson = async () => {
         return data;
       } catch {
         throw new Error(
-          `There was an issue reading the file at ${CHANGES_FILEPATH}`
+          `There was an issue reading the file at ${CHANGES_FILEPATH}: ${err}`
         );
       }
     }
@@ -63,7 +65,7 @@ const updateJson = (initialData, changeData) => {
   };
 
   const removePlaylist = () => {
-    changes.add_songs_to_playlist.forEach((item, index) => {
+    changes.add_songs_to_playlist.forEach((item) => {
       const result = input.playlists.find(
         (playlist) => playlist.id === item.playlist_id
       );
@@ -89,7 +91,7 @@ const updateJson = (initialData, changeData) => {
   });
 
   fs.writeFile(OUTPUT_FILEPATH, JSON.stringify(input, null, 2), (err) => {
-    if (err) console.log("Error writing file:", err);
+    if (err) throw new Error(`There was an issue writing the file: ${err}`);
   });
 };
 
